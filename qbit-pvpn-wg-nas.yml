@@ -1,0 +1,97 @@
+version: "3"
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    hostname: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 6881:6881
+      - 6881:6881/udp
+      - 8085:8085 # qbittorrent (if no conflict)
+      - 9117:9117 # Jackett
+      - 8989:8989 # Sonarr
+      - 9696:9696 # Prowlarr
+    volumes:
+      - /etc/docker/arr-stack/gluetun:/gluetun
+    #under VPN_SERVICE_PROVIDER, you need to use "custom" for this setup, not ProtonVPN as mentioned in the docker-gluetun docs 
+    environment:
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=<your wg private key>
+      - WIREGUARD_ADDRESSES=<the wg subnet under the private key>
+      - WIREGUARD_PUBLIC_KEY=<your wg public key>
+      - TZ=America/Los_Angeles
+      - UPDATER_PERIOD=24h
+      - WIREGUARD_ENDPOINT_IP=<the wg endpoint>
+      - WIREGUARD_ENDPOINT_PORT=<the wg endpoint port>
+    dns:
+      - <wireguard DNS config (this may default to Cloudflare:1.1.1.1 depdending on your host env)>
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - WEBUI_PORT=8085
+    #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
+    #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
+    volumes:
+      - /etc/docker/arr-stack/qbittorrent:/config
+      - /volume1/media/movies:/downloads/movies
+      - /volume1/media/tv:/downloads/tv
+      - /volume1/media/anime:/downloads/anime
+      - /volume1/media/toons:/downloads/toons
+    restart: unless-stopped
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Los_Angeles  # Updated to match others
+      - AUTO_UPDATE=true
+    #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
+    #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
+    volumes:
+      - /etc/docker/arr-stack/jackett/data:/config
+      - /etc/docker/arr-stack/jackett/blackhole:/downloads
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Los_Angeles
+    #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
+    #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
+    volumes:
+      - /etc/docker/arr-stack/sonarr/data:/config
+      - /etc/docker/arr-stack/sonarr/tvseries:/tv
+      - /etc/docker/arr-stack/sonarr/downloadclient-downloads:/downloads
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Los_Angeles
+    #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
+    #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
+    volumes:
+      - /etc/docker/arr-stack/prowlarr/data:/config
+    restart: unless-stopped
