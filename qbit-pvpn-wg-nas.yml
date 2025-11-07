@@ -41,6 +41,8 @@ services:
       - PGID=1000
       - WEBUI_PORT=8085
     #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
+    #If you're doing this on a NAS, the volume directories may be have an abstraction layer or degree of obfuscation depending on the brand
+    #you will need to figure out how these map to your NAS OS drive relative to your docker setup.
     #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
     volumes:
       - /etc/docker/arr-stack/qbittorrent:/config
