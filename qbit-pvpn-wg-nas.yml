@@ -40,16 +40,18 @@ services:
       - PUID=1000
       - PGID=1000
       - WEBUI_PORT=8085
-    #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
-    #If you're doing this on a NAS, the volume directories may be have an abstraction layer or degree of obfuscation depending on the brand
+    #IMPORTANT review OR uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
+    #On some NAS devices, volumes are exposed as logical shares and the actual on-disk paths are hidden or mapped behind an abstraction layer.
+    #For example '/volume1' might actually be 'etc/.../disk1' or '/home/.../vol1/'
     #you will need to figure out how these map to your NAS OS drive relative to your docker setup.
     #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
     volumes:
-      - /etc/docker/arr-stack/qbittorrent:/config
-      - /volume1/media/movies:/downloads/movies
-      - /volume1/media/tv:/downloads/tv
-      - /volume1/media/anime:/downloads/anime
-      - /volume1/media/toons:/downloads/toons
+    #  - /etc/docker/arr-stack/qbittorrent:/config
+    #  - /volume1/media/movies:/downloads/movies
+    #  - /volume1/media/tv:/downloads/tv
+    #  - /volume1/media/anime:/downloads/anime
+    #  - /volume1/media/toons:/downloads/cartoons
+    #  - /volume1/media/toons:/downloads/other ( ͡~ ͜ʖ ͡°)
     restart: unless-stopped
 
   jackett:
@@ -64,8 +66,8 @@ services:
     #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
     #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
     volumes:
-      - /etc/docker/arr-stack/jackett/data:/config
-      - /etc/docker/arr-stack/jackett/blackhole:/downloads
+    #  - /etc/docker/arr-stack/jackett/data:/config
+    #  - /etc/docker/arr-stack/jackett/blackhole:/downloads
     restart: unless-stopped
 
   sonarr:
@@ -79,9 +81,9 @@ services:
     #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
     #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
     volumes:
-      - /etc/docker/arr-stack/sonarr/data:/config
-      - /etc/docker/arr-stack/sonarr/tvseries:/tv
-      - /etc/docker/arr-stack/sonarr/downloadclient-downloads:/downloads
+    #  - /etc/docker/arr-stack/sonarr/data:/config
+    #  - /etc/docker/arr-stack/sonarr/tvseries:/tv
+    #  - /etc/docker/arr-stack/sonarr/downloadclient-downloads:/downloads
     restart: unless-stopped
 
   prowlarr:
@@ -95,5 +97,5 @@ services:
     #IMPORTANT uncomment the following and replace with your volume mounts (the paths where you want your downloads to go)
     #DOCKER WONT MAKE THESE DIRECTORIES AUTOMATICALLY, you will need to create the following, or use your own setup:
     volumes:
-      - /etc/docker/arr-stack/prowlarr/data:/config
+    #  - /etc/docker/arr-stack/prowlarr/data:/config
     restart: unless-stopped
